@@ -1,5 +1,6 @@
 import React from 'react';
 import { ExternalLink, GitBranch as Github } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const projects = [
   {
@@ -37,10 +38,14 @@ const projects = [
 const Projects = () => {
   return (
     <section id="projects" className="section container">
-      <h2 className="section-title animate-fade-in">Featured Projects</h2>
+      <motion.h2 
+        initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.6 }}
+        className="section-title">Featured Projects</motion.h2>
       <div className="grid grid-2">
         {projects.map((project, index) => (
-          <div key={index} className={`glass-card animate-fade-in delay-${(index % 4 + 1) * 100}`}>
+          <motion.div 
+            initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.6, delay: index * 0.15 }}
+            key={index} className="glass-card">
             <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>{project.title}</h3>
             <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', minHeight: '60px' }}>
               {project.description}
@@ -57,7 +62,7 @@ const Projects = () => {
                 <Github size={18} /> Code
               </a>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
     </section>
