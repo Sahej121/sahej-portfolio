@@ -1,6 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
-export default function Hero() {
+export default function Hero({ onInView }) {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (onInView) onInView(entry.isIntersecting);
+    }, { threshold: 0.1 });
+
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [onInView]);
   const titleWords = 'SAHEJ BUDHIRAJA'.split(' ');
   const subtitle = 'Full-Stack Developer & AI Enthusiast.';
   const [visibleWords, setVisibleWords] = useState(0);
@@ -24,9 +34,9 @@ export default function Hero() {
   }, [visibleWords, titleWords.length]);
 
   return (
-    <div className="h-svh relative bg-transparent text-foreground transition-colors pt-32">
+    <div ref={ref} className="h-svh relative bg-transparent text-foreground transition-colors pt-32">
       <div className="h-full uppercase items-center w-full z-60 px-6 flex justify-center flex-col relative pointer-events-none">
-        <div className="text-5xl sm:text-7xl md:text-8xl xl:text-9xl font-black pb-4" style={{ fontFamily: "'Outfit', sans-serif", letterSpacing: '-0.02em' }}>
+        <div className="text-5xl sm:text-7xl md:text-8xl xl:text-9xl font-bold pb-4" style={{ fontFamily: "'Space Grotesk', sans-serif", letterSpacing: '-0.05em' }}>
           <div className="flex space-x-2 md:space-x-6 overflow-hidden text-red-600">
             {titleWords.map((word, index) => (
               <div

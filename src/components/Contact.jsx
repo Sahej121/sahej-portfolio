@@ -1,19 +1,9 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { Mail, GitBranch as Github } from 'lucide-react';
 
-const Contact = ({ onInView }) => {
-  const ref = useRef(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(([entry]) => {
-      if (onInView) onInView(entry.isIntersecting);
-    }, { threshold: 0.3 }); // Darkens gracefully when scrolled down
-
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [onInView]);
+const Contact = () => {
   return (
-    <section ref={ref} id="contact" className="section container" style={{ textAlign: 'center', paddingBottom: '4rem', minHeight: '60vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+    <section id="contact" className="section container" style={{ textAlign: 'center', paddingBottom: '4rem', minHeight: '60vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
       <h2 className="section-title animate-fade-in">Get In Touch</h2>
       <p className="animate-fade-in delay-100" style={{ color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto 3rem', fontSize: '1.1rem' }}>
         I'm currently open for new opportunities and collaborations. Whether you have a question or just want to say hi, I'll try my best to get back to you!

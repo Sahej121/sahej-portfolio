@@ -12,7 +12,7 @@ import { PostProcessing, Scene } from './components/blocks/hero-futuristic';
 
 function App() {
   const [stage, setStage] = useState(0);
-  const [contactInView, setContactInView] = useState(false);
+  const [heroInView, setHeroInView] = useState(true);
 
   useEffect(() => {
     // Stage 1: Fade out JARVIS
@@ -27,7 +27,7 @@ function App() {
     <>
       <div style={{ 
         position: 'fixed', top: 0, left: 0, width: '100%', height: '100vh', zIndex: -2, background: '#000',
-        filter: contactInView ? 'blur(15px) brightness(0.25)' : 'blur(0px) brightness(1)',
+        filter: !heroInView ? 'blur(15px) brightness(0.25)' : 'blur(0px) brightness(1)',
         transition: 'filter 1.5s cubic-bezier(0.4, 0, 0.2, 1)'
       }}>
         <Canvas flat gl={async (props) => { const renderer = new THREE.WebGPURenderer(props); await renderer.init(); return renderer; }}>
@@ -61,10 +61,10 @@ function App() {
       }}>
         <Navbar />
         <main>
-          <Hero />
+          <Hero onInView={setHeroInView} />
           <About />
           <Projects />
-          <Contact onInView={setContactInView} />
+          <Contact />
         </main>
       </div>
     </>
