@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Particles Swarm Export</title>
+    <style>body { margin: 0; overflow: hidden; background: #000; }</style>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+</head>
+<body>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+        // CONFIG
+        const COUNT = 20000;
+        const SPEED_MULT = 1;
+        const AUTO_SPIN = true;
+
+        // SETUP
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x000000, 0.01);
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
+        camera.position.set(0, 0, 100);
+        
+        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.autoRotate = AUTO_SPIN;
+        controls.autoRotateSpeed = 2.0;
+
+        // POST PROCESSING
+        const composer = new EffectComposer(renderer);
+        composer.addPass(new RenderPass(scene, camera));
+        const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+        bloomPass.strength = 1.8; bloomPass.radius = 0.4; bloomPass.threshold = 0;
+        composer.addPass(bloomPass);
+
+        // SWARM OBJECTS
+        const dummy = new THREE.Object3D();
+        const color = new THREE.Color();
+        const target = new THREE.Vector3();
+        const pColor = new THREE.Color(); // Kept for safety, for potential references
+        
+        // INSTANCED MESH
+        const geometry = new THREE.TetrahedronGeometry(0.25);
+        const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        
+        const instancedMesh = new THREE.InstancedMesh(geometry, material, COUNT);
+        instancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+        scene.add(instancedMesh);
+
+        // DATA ARRAYS
+        const positions = [];
+        for(let i=0; i<COUNT; i++) {
+            positions.push(new THREE.Vector3((Math.random()-0.5)*800, (Math.random()-0.5)*800, (Math.random()-0.5)*800));
+            instancedMesh.setColorAt(i, color.setHex(0x00ff88)); // Init Color
+        }
+
+        // CONTROL STUBS
+        const PARAMS = {"signalSpeed":2.746,"fireIntensity":0.28,"brainSize":52,"circuitDense":8,"coreGlow":1};
+        const addControl = (id, label, min, max, val) => {
+            return PARAMS[id] !== undefined ? PARAMS[id] : val;
+        };
+        const setInfo = () => {};
+        const annotate = () => {};
+
+        // ANIMATION LOOP
+        const clock = new THREE.Clock();
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            const delta = clock.getDelta();
+            const time = clock.getElapsedTime() * SPEED_MULT;
+            
+            // Shader Time Update
+            if(material.uniforms && material.uniforms.uTime) {
+                material.uniforms.uTime.value = time;
+            }
+
+            controls.update();
+
+            // SWARM LOGIC
+            const count = COUNT; // Alias for user code compatibility
+            for(let i=0; i<COUNT; i++) {
+                 // USER CODE INJECTION START
+                 // ============================================================
+                 //  JARVIS MACHINE BRAIN — NEURAL SIGNAL TRANSMISSION
+                 //  22,000 particles · Molten gold / amber · Black void
+                 //  Structure: Cortex Shell · Circuit Axons · Signal Pulses · Arc Core
+                 // ============================================================
+                 
+                 // --- CONTROLS ---
+                 const signalSpeed  = addControl("signalSpeed",  "Signal Speed",      0.1, 5.0,  1.8);
+                 const fireIntensity= addControl("fireIntensity","Fire Intensity",    0.0, 1.0,  0.72);
+                 const brainSize    = addControl("brainSize",    "Brain Size",        25,  75,   44);
+                 const circuitDense = addControl("circuitDense", "Circuit Density",   1.0, 8.0,  3.5);
+                 const coreGlow     = addControl("coreGlow",     "Core Glow",         0.0, 1.0,  0.65);
+                 
+                 // --- TIME & SEEDS ---
+                 const t     = time * signalSpeed;
+                 const norm  = i / count;
+                 
+                 // Deterministic per-particle seeds — no allocations
+                 const seed  = i * 1.6180339887;
+                 const seedB = i * 2.2360679774;
+                 const seedC = i * 0.7071067811;
+                 const seedD = i * 1.4142135623;
+                 
+                 // Fractional parts — fast pseudo-random in [0,1)
+                 const fA = seed  * 7919.0 - Math.floor(seed  * 7919.0);
+                 const fB = seedB * 6271.0 - Math.floor(seedB * 6271.0);
+                 const fC = seedC * 4987.0 - Math.floor(seedC * 4987.0);
+                 const fD = seedD * 3571.0 - Math.floor(seedD * 3571.0);
+                 
+                 // Partition into 5 functional layers (mod 9)
+                 // 0-2  = cortex shell (neuron cell bodies on brain surface)
+                 // 3-4  = deep white matter circuits (axon bundles, grid-like)
+                 // 5-6  = signal wavefronts (travelling pulses along tracts)
+                 // 7    = glowing arc ring (equatorial latitude band)
+                 // 8    = molten core singularity
+                 const layer = i % 9;
+                 
+                 // --- REAL BRAIN SHAPE ---
+                 // Prolate spheroid with gyri (surface ridges) baked in via sinusoidal displacement
+                 const phi   = fA * 3.1415926;          // polar   0..PI
+                 const theta = fB * 6.2831853;          // azimuth 0..2PI
+                 const sinPhi= Math.sin(phi);
+                 const cosPhi= Math.cos(phi);
+                 const sinTh = Math.sin(theta);
+                 const cosTh = Math.cos(theta);
+                 
+                 // Base prolate brain: wider X, narrower Y (frontal-occipital axis)
+                 const baseR = brainSize;
+                 const bx0   = baseR * 1.15 * sinPhi * cosTh;
+                 const by0   = baseR * 0.82 * cosPhi;
+                 const bz0   = baseR * 0.95 * sinPhi * sinTh;
+                 
+                 // Hemisphere split — central longitudinal fissure
+                 const hemi   = bx0 > 0 ? 1.0 : -1.0;
+                 const fissure= Math.exp(-bx0 * bx0 * 0.0012) * 5.5;
+                 const bx     = bx0 + hemi * fissure;
+                 const by     = by0;
+                 const bz     = bz0;
+                 
+                 // Gyri surface wrinkle (cortical folds) — displaces outward along normal
+                 const gyriFreq  = 6.0;
+                 const gyri      = 1.8 * (
+                   Math.sin(phi * gyriFreq + fC * 4.0) *
+                   Math.cos(theta * gyriFreq * 0.7 + fD * 3.0)
+                 );
+                 const nx = sinPhi * cosTh;
+                 const ny = cosPhi;
+                 const nz = sinPhi * sinTh;
+                 const gx = bx + nx * gyri;
+                 const gy = by + ny * gyri;
+                 const gz = bz + nz * gyri;
+                 
+                 // ----------------------------------------------------------------
+                 let px, py, pz, hue, sat, lit;
+                 
+                 // ============================================================
+                 //  LAYER 0-2 · CORTEX SHELL  (neuron bodies on brain surface)
+                 //  Tiny jitter stays on the gyri surface
+                 // ============================================================
+                 if (layer <= 2) {
+                 
+                   const jitter = 0.9 + fC * 1.2;
+                   const pulse  = Math.sin(t * 1.4 + fA * 9.7) * 0.5;
+                   px = gx + nx * (jitter + pulse);
+                   py = gy + ny * (jitter + pulse);
+                   pz = gz + nz * (jitter + pulse);
+                 
+                   // Dark amber — resting neurons
+                   hue = 0.095 + 0.025 * Math.sin(norm * 11.0 + t * 0.3);
+                   sat = 0.95;
+                   lit = 0.28 + 0.18 * fA + 0.12 * Math.abs(pulse);
+                 
+                 // ============================================================
+                 //  LAYER 3-4 · WHITE MATTER CIRCUITS  (axon grid bundles)
+                 //  Straight radial + tangential fiber tracts — machine-like grid
+                 // ============================================================
+                 } else if (layer <= 4) {
+                 
+                   const tractIdx  = Math.floor(fC * 180.0);
+                   const tractAng  = tractIdx * 0.03490658;      // 2PI/180 per tract
+                   const tractPos  = fB;                          // 0..1 along tract length
+                   const tractRad  = brainSize * (0.30 + 0.55 * tractPos);
+                 
+                   // Tracts run along latitude bands — creates circuit-board appearance
+                   const latBand   = Math.floor(fD * 9.0) * 0.3490658; // 9 latitude rings
+                   const cosLat    = Math.cos(latBand);
+                   const sinLat    = Math.sin(latBand);
+                 
+                   px = tractRad * Math.cos(tractAng) * sinLat;
+                   py = tractRad * cosLat * (0.85 + 0.15 * Math.sin(t * 0.5 + tractIdx * 0.4));
+                   pz = tractRad * Math.sin(tractAng) * sinLat;
+                 
+                   // Slight electrical flicker along each tract
+                   const flicker = Math.sin(t * 3.0 + tractPos * 6.28 + tractIdx * 1.3) * fireIntensity;
+                   hue = 0.08 + 0.03 * Math.sin(tractPos * 8.0 + t * 0.8);
+                   sat = 1.0;
+                   lit = 0.22 + 0.30 * tractPos + 0.28 * Math.abs(flicker);
+                 
+                 // ============================================================
+                 //  LAYER 5-6 · SIGNAL WAVEFRONTS  (action potential pulses)
+                 //  Travelling bright sparks racing along axon paths
+                 // ============================================================
+                 } else if (layer <= 6) {
+                 
+                   // Each signal lives on one of 60 axon highways
+                   const axonIdx   = Math.floor(fA * 60.0);
+                   const axonAng   = axonIdx * 0.10471975;        // 2PI/60
+                   const axonLat   = (Math.floor(fD * 6.0)) * 0.5235987; // 6 latitude tiers
+                 
+                   // Signal position travels from core outward and loops back
+                   const signalT   = (fB + t * 0.55 + axonIdx * 0.07);
+                   const signalPos = signalT - Math.floor(signalT);  // 0..1 sawtooth
+                   const sigR      = brainSize * (0.08 + 0.88 * signalPos);
+                 
+                   const cosALat   = Math.cos(axonLat);
+                   const sinALat   = Math.sin(axonLat);
+                 
+                   px = sigR * Math.cos(axonAng) * sinALat;
+                   py = sigR * cosALat;
+                   pz = sigR * Math.sin(axonAng) * sinALat;
+                 
+                   // Bright spike at wavefront, dimmer tail
+                   const spike = Math.exp(-Math.pow((signalPos - 0.9) * 12.0, 2.0));
+                   const tail  = Math.exp(-Math.pow((signalPos - 0.85) * 4.0, 2.0)) * 0.4;
+                   hue = 0.07 + 0.04 * spike;
+                   sat = 1.0;
+                   lit = 0.35 + 0.55 * (spike + tail) * fireIntensity;
+                 
+                 // ============================================================
+                 //  LAYER 7 · EQUATORIAL ARC RING  (machine diagnostic ring)
+                 //  Bright orbital band — like the JARVIS scan ring
+                 // ============================================================
+                 } else if (layer === 7) {
+                 
+                   // Particles form a tight glowing ring around the brain equator
+                   const ringAngle = fA * 6.2831853 + t * 0.22;
+                   const ringTilt  = fB * 0.5 - 0.25;    // slight tilt variation
+                   const ringR     = brainSize * (1.02 + 0.04 * Math.sin(t * 2.0 + fA * 12.0));
+                   const ringSpread= 1.5 * fC - 0.75;
+                 
+                   px = ringR * Math.cos(ringAngle);
+                   py = ringR * Math.sin(ringTilt) + ringSpread;
+                   pz = ringR * Math.sin(ringAngle);
+                 
+                   const ringPulse = Math.sin(t * 4.0 + fA * 6.28) * 0.5 + 0.5;
+                   hue = 0.10 + 0.02 * ringPulse;
+                   sat = 1.0;
+                   lit = 0.50 + 0.40 * ringPulse * coreGlow;
+                 
+                 // ============================================================
+                 //  LAYER 8 · MOLTEN CORE  (arc reactor / singularity)
+                 //  Dense glowing center — the brightest region
+                 // ============================================================
+                 } else {
+                 
+                   // Chaotic but bounded core — swirling tight Lorenz-like attractor
+                   const coreR   = brainSize * 0.18 * (0.4 + 0.6 * fA);
+                   const coreAng = fB * 6.2831853 + t * (1.5 + fC * 2.0);
+                   const coreEl  = (fD - 0.5) * 1.8;          // elevation
+                   const twist   = Math.sin(t * 2.3 + fA * 5.0) * 0.8;
+                 
+                   px = coreR * Math.cos(coreAng + twist);
+                   py = coreR * Math.sin(coreEl) + Math.sin(t * 1.7 + fB * 4.0) * brainSize * 0.04;
+                   pz = coreR * Math.sin(coreAng + twist * 0.7);
+                 
+                   // White-hot at centre → gold → amber at edges
+                   const radNorm = coreR / (brainSize * 0.18 + 0.001);
+                   hue = 0.06 + 0.06 * radNorm;
+                   sat = 0.90 + 0.10 * radNorm;
+                   lit = 0.80 - 0.45 * radNorm + 0.15 * coreGlow * Math.abs(Math.sin(t * 3.1 + fA * 7.0));
+                 }
+                 
+                 // --- SLOW GLOBAL ROTATION (Y-axis) ---
+                 const rotA = t * 0.07;
+                 const cosR = Math.cos(rotA);
+                 const sinR = Math.sin(rotA);
+                 const finalX = px * cosR - pz * sinR;
+                 const finalZ = px * sinR + pz * cosR;
+                 
+                 // --- WRITE OUTPUT ---
+                 let fx = finalX, fy = py, fz = finalZ;
+                 if (time > 3.0) {
+                     const burst = Math.pow(time - 3.0, 3.0) * 150.0;
+                     fx += (fA - 0.5) * burst;
+                     fy += (fB - 0.5) * burst;
+                     fz += (fC - 0.5) * burst;
+                     lit *= Math.max(0, 1.0 - (time - 3.0) * 0.8);
+                 }
+                 target.set(fx, fy, fz);
+                 
+                 // Red theme override
+                 hue = 0.0; // Pure Red
+                 sat = 1.0; // Fully saturated
+                 lit = Math.min(1.0, lit * 1.2 + 0.1); // Bright and glowing
+                 color.setHSL(hue, sat, lit);
+                 
+                 // --- HUD ---
+                 if (i === 0) {
+                   setInfo(
+                     "JARVIS Machine Brain",
+                     "22,000 neural signal particles. Cortex shell · Circuit axons · Signal wavefronts · Arc ring · Molten core. Raise Fire Intensity to accelerate signal transmission."
+                   );
+                 }
+                 // USER CODE INJECTION END
+
+                 // LERP & UPDATE
+                 const lerpSpeed = Math.min(0.2, time * 0.015 + 0.002);
+                 positions[i].lerp(target, lerpSpeed);
+                 dummy.position.copy(positions[i]);
+                 dummy.updateMatrix();
+                 instancedMesh.setMatrixAt(i, dummy.matrix);
+                 instancedMesh.setColorAt(i, color); // Fix: Use 'color' which user modifies
+            }
+            instancedMesh.instanceMatrix.needsUpdate = true;
+            instancedMesh.instanceColor.needsUpdate = true;
+
+            composer.render();
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
